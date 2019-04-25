@@ -96,7 +96,9 @@ namespace DarkUI.Docking
         public virtual void Close()
         {
             if (DockPanel != null)
+            {
                 DockPanel.RemoveContent(this);
+            }
         }
 
         #endregion

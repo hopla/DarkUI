@@ -139,8 +139,10 @@ namespace DarkUI.Docking
             base.OnMouseUp(e);
 
             if (_closeButtonRect.Contains(e.Location) && _closeButtonPressed)
+            {
                 Close();
-
+            }
+            
             _closeButtonPressed = false;
             _closeButtonHot = false;
 

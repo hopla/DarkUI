@@ -15,6 +15,7 @@ namespace DarkUI.Docking
         public event EventHandler<DockContentEventArgs> ActiveContentChanged;
         public event EventHandler<DockContentEventArgs> ContentAdded;
         public event EventHandler<DockContentEventArgs> ContentRemoved;
+        public event EventHandler<DockContentRemovingEventArgs> ContentRemoving;
 
         #endregion
 
@@ -51,8 +52,7 @@ namespace DarkUI.Docking
                 foreach (var region in _regions.Values)
                     region.Redraw();
 
-                if (ActiveContentChanged != null)
-                    ActiveContentChanged(this, new DockContentEventArgs(_activeContent));
+                ActiveContentChanged?.Invoke(this, new DockContentEventArgs(_activeContent));
 
                 _switchingContent = false;
             }
@@ -153,8 +153,7 @@ namespace DarkUI.Docking
             var region = _regions[dockContent.DockArea];
             region.AddContent(dockContent, dockGroup);
 
-            if (ContentAdded != null)
-                ContentAdded(this, new DockContentEventArgs(dockContent));
+            ContentAdded?.Invoke(this, new DockContentEventArgs(dockContent));
 
             dockContent.Select();
         }
@@ -172,8 +171,7 @@ namespace DarkUI.Docking
             var region = _regions[dockGroup.DockArea];
             region.InsertContent(dockContent, dockGroup, insertType);
 
-            if (ContentAdded != null)
-                ContentAdded(this, new DockContentEventArgs(dockContent));
+            ContentAdded?.Invoke(this, new DockContentEventArgs(dockContent));
 
             dockContent.Select();
         }
@@ -183,14 +181,18 @@ namespace DarkUI.Docking
             if (!_contents.Contains(dockContent))
                 return;
 
+            // check if no cancelled
+            Boolean cancel = new Boolean(false);
+            ContentRemoving?.Invoke(this, new DockContentRemovingEventArgs(dockContent, cancel));
+            if (cancel.Value) return;
+
             dockContent.DockPanel = null;
             _contents.Remove(dockContent);
 
             var region = _regions[dockContent.DockArea];
             region.RemoveContent(dockContent);
 
-            if (ContentRemoved != null)
-                ContentRemoved(this, new DockContentEventArgs(dockContent));
+            ContentRemoved?.Invoke(this, new DockContentEventArgs(dockContent));
         }
 
         public bool ContainsContent(DarkDockContent dockContent)
