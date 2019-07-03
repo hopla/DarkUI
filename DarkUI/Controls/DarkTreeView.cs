@@ -387,6 +387,9 @@ namespace DarkUI.Controls
                 return;
             }
 
+            if (!SelectWithArrowKeys)
+                return;
+
             if (e.KeyCode == Keys.Down || e.KeyCode == Keys.Up)
             {
                 if (MultiSelect && ModifierKeys == Keys.Shift)
