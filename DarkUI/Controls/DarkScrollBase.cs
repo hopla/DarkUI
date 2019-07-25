@@ -30,6 +30,8 @@ namespace DarkUI.Controls
         private int _maxDragChange = 0;
         private Timer _dragTimer;
 
+        private bool _hideScrollBars = true;
+
         #endregion
 
         #region Property Region
@@ -87,6 +89,24 @@ namespace DarkUI.Controls
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsDragging { get; private set; }
+
+        [Category("Behavior")]
+        [Description("Determines whether scrollbars will remain visible when disabled.")]
+        [DefaultValue(true)]
+        public bool HideScrollBars
+        {
+            get { return _hideScrollBars; }
+            set
+            {
+                _hideScrollBars = value;
+                UpdateScrollBars();
+            }
+        }
+
+        [Category("Behavior")]
+        [Description("Determines whether the selected node can be changed with the arrow keys.")]
+        [DefaultValue(true)]
+        public bool SelectWithArrowKeys { get; set; }
 
         #endregion
 
@@ -159,8 +179,14 @@ namespace DarkUI.Controls
 
         private void SetScrollBarVisibility()
         {
-            _vScrollBar.Visible = _visibleSize.Height < ContentSize.Height;
-            _hScrollBar.Visible = _visibleSize.Width < ContentSize.Width;
+            _vScrollBar.Enabled = _visibleSize.Height < ContentSize.Height;
+            _hScrollBar.Enabled = _visibleSize.Width < ContentSize.Width;
+
+            if (_hideScrollBars)
+            {
+                _vScrollBar.Visible = _vScrollBar.Enabled;
+                _hScrollBar.Visible = _hScrollBar.Enabled;
+            }
         }
 
         private void SetVisibleSize()
