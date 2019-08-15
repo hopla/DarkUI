@@ -10,16 +10,23 @@ namespace DarkUI.Controls
         #region Field Region
 
         private string _sectionHeader;
+        private int _sectionHeaderHeight = 25;
+        private Font _sectionHeaderFont = DefaultFont;
 
         #endregion
 
         #region Property Region
 
-        [Browsable(false)]
+        [Category("Appearance")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new Padding Padding
         {
-            get { return base.Padding; }
+            get => new Padding(base.Padding.Left, base.Padding.Top - SectionHeaderHeight, base.Padding.Right, base.Padding.Bottom);
+            set
+            {
+                base.Padding = new Padding(value.Left, value.Top + SectionHeaderHeight, value.Right, value.Bottom);
+                Invalidate();
+            }
         }
 
         [Category("Appearance")]
@@ -30,6 +37,33 @@ namespace DarkUI.Controls
             set
             {
                 _sectionHeader = value;
+                Invalidate();
+            }
+        }
+
+        [Category("Appearance")]
+        [Description("The height of the section header.")]
+        [DefaultValue(25)]
+        public int SectionHeaderHeight
+        {
+            get => _sectionHeaderHeight;
+            set
+            {
+                _sectionHeaderHeight = value;
+                base.Padding = new Padding(base.Padding.Left, value, base.Padding.Right, base.Padding.Bottom);
+                Invalidate();
+            }
+        }
+
+        [Category("Appearance")]
+        [Description("The font used to render the section header text.")]
+        [DefaultValue(typeof(Font), "Microsoft Sans Serif, 8.25pt")]
+        public Font SectionHeaderFont
+        {
+            get => _sectionHeaderFont;
+            set
+            {
+                _sectionHeaderFont = value;
                 Invalidate();
             }
         }
@@ -95,14 +129,14 @@ namespace DarkUI.Controls
 
             using (var b = new SolidBrush(bgColor))
             {
-                var bgRect = new Rectangle(0, 0, rect.Width, 25);
+                var bgRect = new Rectangle(0, 0, rect.Width, SectionHeaderHeight);
                 g.FillRectangle(b, bgRect);
             }
 
             using (var p = new Pen(darkColor))
             {
                 g.DrawLine(p, rect.Left, 0, rect.Right, 0);
-                g.DrawLine(p, rect.Left, 25 - 1, rect.Right, 25 - 1);
+                g.DrawLine(p, rect.Left, SectionHeaderHeight - 1, rect.Right, SectionHeaderHeight - 1);
             }
 
             using (var p = new Pen(lightColor))
@@ -114,7 +148,7 @@ namespace DarkUI.Controls
 
             using (var b = new SolidBrush(Colors.LightText))
             {
-                var textRect = new Rectangle(xOffset, 0, rect.Width - 4 - xOffset, 25);
+                var textRect = new Rectangle(xOffset, 0, rect.Width - 4 - xOffset, SectionHeaderHeight);
 
                 var format = new StringFormat
                 {
@@ -124,7 +158,7 @@ namespace DarkUI.Controls
                     Trimming = StringTrimming.EllipsisCharacter
                 };
 
-                g.DrawString(SectionHeader, Font, b, textRect, format);
+                g.DrawString(SectionHeader, SectionHeaderFont, b, textRect, format);
             }
 
             // Draw border
