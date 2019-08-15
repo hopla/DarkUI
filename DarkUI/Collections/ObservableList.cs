@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace DarkUI.Collections
@@ -16,6 +17,7 @@ namespace DarkUI.Collections
 
         public event EventHandler<ObservableListModified<T>> ItemsAdded;
         public event EventHandler<ObservableListModified<T>> ItemsRemoved;
+        public event EventHandler<ObservableListChanged<T>> ItemsChanged;
 
         #endregion
 
@@ -58,8 +60,8 @@ namespace DarkUI.Collections
         {
             base.Add(item);
 
-            if (ItemsAdded != null)
-                ItemsAdded(this, new ObservableListModified<T>(new List<T> { item }));
+            ItemsAdded?.Invoke(this, new ObservableListModified<T>(new List<T> { item }));
+            ItemsChanged?.Invoke(this, new ObservableListChanged<T>(new List<T> { item }, NotifyCollectionChangedAction.Add));
         }
 
         public new void AddRange(IEnumerable<T> collection)
@@ -68,16 +70,16 @@ namespace DarkUI.Collections
 
             base.AddRange(list);
 
-            if (ItemsAdded != null)
-                ItemsAdded(this, new ObservableListModified<T>(list));
+            ItemsAdded?.Invoke(this, new ObservableListModified<T>(list));
+            ItemsChanged?.Invoke(this, new ObservableListChanged<T>(list, NotifyCollectionChangedAction.Add));
         }
 
         public new void Remove(T item)
         {
             base.Remove(item);
 
-            if (ItemsRemoved != null)
-                ItemsRemoved(this, new ObservableListModified<T>(new List<T> { item }));
+            ItemsRemoved?.Invoke(this, new ObservableListModified<T>(new List<T> { item }));
+            ItemsChanged?.Invoke(this, new ObservableListChanged<T>(new List<T> { item }, NotifyCollectionChangedAction.Remove));
         }
 
         #endregion
