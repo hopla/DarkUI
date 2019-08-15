@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DarkUI.Collections;
 
 namespace DarkUI.Controls
 {
@@ -21,8 +22,6 @@ namespace DarkUI.Controls
         #region Field Region
 
         private DarkControlState _controlState = DarkControlState.Normal;
-
-        private ObservableCollection<DarkDropdownItem> _items = new ObservableCollection<DarkDropdownItem>();
         private DarkDropdownItem _selectedItem;
 
         private DarkContextMenu _menu = new DarkContextMenu();
@@ -43,10 +42,7 @@ namespace DarkUI.Controls
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ObservableCollection<DarkDropdownItem> Items
-        {
-            get { return _items; }
-        }
+        public ObservableList<DarkDropdownItem> Items { get; } = new ObservableList<DarkDropdownItem>();
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -135,7 +131,7 @@ namespace DarkUI.Controls
             _menu.AutoSize = false;
             _menu.Closed += Menu_Closed;
 
-            Items.CollectionChanged += Items_CollectionChanged;
+            Items.ItemsChanged += Items_CollectionChanged;
             SelectedItemChanged += DarkDropdownList_SelectedItemChanged;
 
             SetControlState(DarkControlState.Normal);
@@ -221,7 +217,7 @@ namespace DarkUI.Controls
 
         #region Event Handler Region
 
-        private void Items_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void Items_CollectionChanged(object sender, ObservableListChanged<DarkDropdownItem> e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
