@@ -494,6 +494,8 @@ namespace DarkUI.Controls
             if (IsDragging)
                 return;
 
+            ContentSize = new Size(0, 0);
+
             if (Nodes.Count == 0)
                 return;
 
@@ -501,9 +503,7 @@ namespace DarkUI.Controls
             var isOdd = false;
             var index = 0;
             DarkTreeNode prevNode = null;
-
-            ContentSize = new Size(0, 0);
-
+            
             for (var i = 0; i <= Nodes.Count - 1; i++)
             {
                 var node = Nodes[i];

@@ -1,328 +1,214 @@
-﻿using System;
+﻿using DarkUI.Config;
+using DarkUI.Icons;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using DarkUI.Config;
-using System.Windows.Forms.Design;
-using DarkUI.Extensions;
 
 namespace DarkUI.Controls
 {
     public class DarkComboBox : ComboBox
     {
-        #region Static
-        public static Bitmap DefaultButtonIcon { get { return Icons.ComboBoxIcons.combobox_arrow; } }
-        #endregion
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new Color ForeColor { get; set; }
 
-        #region Fields
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new Color BackColor { get; set; }
 
-        // Visual look
-        private static readonly Brush _focusBrush = new SolidBrush(SystemColors.Highlight);
-        private Color _borderColor = Colors.GreySelection;
-        private ButtonBorderStyle _borderStyle = ButtonBorderStyle.Solid;
-        private Color _buttonColor = Colors.LightBackground;
-        private Bitmap _buttonIcon = DefaultButtonIcon;
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new FlatStyle FlatStyle { get; set; }
 
-        // Text
-        private Padding _textPadding = new Padding(2);
-        
-        #endregion Fields
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new ComboBoxStyle DropDownStyle { get; set; }
 
-        #region Constructor
-        public DarkComboBox()
+        private Bitmap _buffer;
+
+        public DarkComboBox() : base()
         {
-            SetStyle(ControlStyles.UserPaint, true);
-            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            SetStyle(ControlStyles.ResizeRedraw, true);
-            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                     ControlStyles.ResizeRedraw |
+                     ControlStyles.UserPaint, true);
 
             DrawMode = DrawMode.OwnerDrawVariable;
 
-            FlatStyle = FlatStyle.Flat;
-            DropDownStyle = ComboBoxStyle.DropDownList;
-
-            BackColor = Colors.LightBackground;
-            ForeColor = Colors.LightText;
+            base.FlatStyle = FlatStyle.Flat;
+            base.DropDownStyle = ComboBoxStyle.DropDownList;
         }
-        #endregion Constructor
 
-        #region Properties
-        [DefaultValue(DrawMode.OwnerDrawVariable)]
-        [RefreshProperties(RefreshProperties.Repaint)]
-        public new DrawMode DrawMode
+        protected override void Dispose(bool disposing)
         {
-            get { return base.DrawMode; }
-            set { base.DrawMode = value; }
+            if (disposing)
+                _buffer = null;
+
+            base.Dispose(disposing);
         }
 
-        [DefaultValue(FlatStyle.Flat)]
-        public new FlatStyle FlatStyle
+        protected override void OnTabStopChanged(EventArgs e)
         {
-            get { return base.FlatStyle; }
-            set { base.FlatStyle = value; }
+            base.OnTabStopChanged(e);
+            Invalidate();
         }
 
-        [DefaultValue(ComboBoxStyle.DropDownList)]
-        public new ComboBoxStyle DropDownStyle
+        protected override void OnTabIndexChanged(EventArgs e)
         {
-            get { return base.DropDownStyle; }
-            set { base.DropDownStyle = value; }
+            base.OnTabIndexChanged(e);
+            Invalidate();
         }
 
-        [Category("Appearance")]
-        [ReadOnly(true)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public sealed override Color ForeColor
+        protected override void OnGotFocus(EventArgs e)
         {
-            get { return base.ForeColor; }
-            set
-            {
-                base.ForeColor = value;
-                Invalidate();
-            }
+            base.OnGotFocus(e);
+            Invalidate();
         }
 
-        [Category("Appearance")]
-        [ReadOnly(true)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public sealed override Color BackColor
+        protected override void OnLostFocus(EventArgs e)
         {
-            get { return base.BackColor; }
-            set
-            {
-                base.BackColor = value;
-                Invalidate();
-            }
+            base.OnLostFocus(e);
+            Invalidate();
         }
 
-        [Category("Appearance")]
-        [ReadOnly(true)]
-        public Color ButtonColor
-        {
-            get { return _buttonColor; }
-            set
-            {
-                _buttonColor = value;
-                Invalidate();
-            }
-        }
-
-        [Category("Appearance")]
-        [ReadOnly(true)]
-        public Bitmap ButtonIcon
-        {
-            get { return _buttonIcon; }
-            set
-            {
-                _buttonIcon = value;
-                Invalidate();
-            }
-        }
-
-        [Category("Appearance")]
-        [ReadOnly(true)]
-        public Color BorderColor
-        {
-            get { return _borderColor; }
-            set
-            {
-                _borderColor = value;
-                Invalidate();
-            }
-        }
-
-        [Category("Appearance")]
-        [DefaultValue(ButtonBorderStyle.Solid)]
-        public ButtonBorderStyle BorderStyle
-        {
-            get { return _borderStyle; }
-            set
-            {
-                _borderStyle = value;
-                Invalidate();
-            }
-        }
-
-        [Category("Appearance")]
-        [DefaultValue(false)]
-        public bool DrawDropdownHoverOutline { get; set; }
-
-        [Category("Appearance")]
-        [DefaultValue(false)]
-        public bool DrawFocusRectangle { get; set; }
-
-        [Category("Appearance")]
-        [ReadOnly(true)]
-        public Padding TextPadding
-        {
-            get { return _textPadding; }
-            set
-            {
-                _textPadding = value;
-                Invalidate();
-            }
-        }
-
-        #endregion Properties
-
-        #region Methods
-        public new void Invalidate()
-        {
-            base.Invalidate();
-        }
-        #endregion Methods
-
-        #region On Events
-
-        #region Data Events
         protected override void OnTextChanged(EventArgs e)
         {
-            Invalidate();
-
             base.OnTextChanged(e);
+            Invalidate();
         }
 
         protected override void OnTextUpdate(EventArgs e)
         {
-            Invalidate();
-
             base.OnTextUpdate(e);
+            Invalidate();
         }
 
         protected override void OnSelectedValueChanged(EventArgs e)
         {
-            Invalidate();
-
             base.OnSelectedValueChanged(e);
+            Invalidate();
         }
-        #endregion
 
-        #region Drawing Events
-        protected override void OnDrawItem(DrawItemEventArgs e)
+        protected override void OnInvalidated(InvalidateEventArgs e)
         {
-            if (!DroppedDown && !DrawDropdownHoverOutline)
-            {
-                using (var backBrush = new SolidBrush(BackColor))
-                    e.Graphics.FillRectangle(backBrush, e.Bounds);
-            }
-            else
-            {
-                e.DrawBackground();
-            }
+            base.OnInvalidated(e);
+            PaintCombobox();
+        }
 
-            if (Items.Count <= e.Index || e.Index <= -1)
-                return;
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            _buffer = null;
+            Invalidate();
+        }
 
-            using (var foreBrush = new SolidBrush(ForeColor))
-            {
-                var formatE = new ListControlConvertEventArgs(null, typeof(string), Items[e.Index]);
-                OnFormat(formatE);
-                string text = formatE.Value?.ToString() ?? Items[e.Index].ToString();
-                e.Graphics.DrawString(text, e.Font, foreBrush, e.Bounds, StringFormat.GenericDefault);
-            }
+        private void PaintCombobox()
+        {
+            if (_buffer == null)
+                _buffer = new Bitmap(ClientRectangle.Width, ClientRectangle.Height);
 
-            if (DrawDropdownHoverOutline)
+            using (var g = Graphics.FromImage(_buffer))
             {
-                e.DrawFocusRectangle();
+                var rect = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height);
+
+                var textColor = Colors.LightText;
+                var borderColor = Colors.GreySelection;
+                var fillColor = Colors.LightBackground;
+
+                if (Focused && TabStop)
+                    borderColor = Colors.BlueHighlight;
+
+                using (var b = new SolidBrush(fillColor))
+                {
+                    g.FillRectangle(b, rect);
+                }
+
+                using (var p = new Pen(borderColor, 1))
+                {
+                    var modRect = new Rectangle(rect.Left, rect.Top, rect.Width - 1, rect.Height - 1);
+                    g.DrawRectangle(p, modRect);
+                }
+
+                var icon = ScrollIcons.scrollbar_arrow_hot;
+                g.DrawImageUnscaled(icon,
+                                    rect.Right - icon.Width - (Consts.Padding / 2),
+                                    (rect.Height / 2) - (icon.Height / 2));
+
+                var text = SelectedItem != null ? SelectedItem.ToString() : Text;
+
+                using (var b = new SolidBrush(textColor))
+                {
+                    var padding = 2;
+
+                    var modRect = new Rectangle(rect.Left + padding,
+                                                rect.Top + padding,
+                                                rect.Width - icon.Width - (Consts.Padding / 2) - (padding * 2),
+                                                rect.Height - (padding * 2));
+
+                    var stringFormat = new StringFormat
+                    {
+                        LineAlignment = StringAlignment.Center,
+                        Alignment = StringAlignment.Near,
+                        FormatFlags = StringFormatFlags.NoWrap,
+                        Trimming = StringTrimming.EllipsisCharacter
+                    };
+
+                    g.DrawString(text, Font, b, modRect, stringFormat);
+                }
             }
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Rectangle buttonRect = new Rectangle(ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth, 0, SystemInformation.VerticalScrollBarWidth, ClientRectangle.Height);
-            Rectangle buttonIconRect = new Rectangle(buttonRect.Left + (buttonRect.Width - _buttonIcon.Width) / 2, buttonRect.Top + (buttonRect.Height / 2 - _buttonIcon.Height / 2), _buttonIcon.Width, _buttonIcon.Height);
-            Rectangle textRect = new Rectangle(1 + _textPadding.Left, 1 + _textPadding.Top, ClientRectangle.Width - (2 + buttonRect.Width + _textPadding.Horizontal), ClientRectangle.Height - (2 + _textPadding.Vertical));
+            if (_buffer == null)
+                PaintCombobox();
 
-            // Draw background
-            using (var buttonBrush = new SolidBrush(_buttonColor))
-                e.Graphics.FillRectangle(buttonBrush, buttonRect);
+            var g = e.Graphics;
+            g.DrawImageUnscaled(_buffer, Point.Empty);
+        }
 
-            // Draw arrow
-            e.Graphics.DrawImage(_buttonIcon.SetOpacity(Colors.Brightness), buttonIconRect);
+        protected override void OnDrawItem(DrawItemEventArgs e)
+        {
+            var g = e.Graphics;
+            var rect = e.Bounds;
 
-            // Draw borders
-            ControlPaint.DrawBorder(e.Graphics, buttonRect, _borderColor, ButtonBorderStyle.Solid);
-            ControlPaint.DrawBorder(e.Graphics, ClientRectangle, _borderColor, ButtonBorderStyle.Solid);
+            var textColor = Colors.LightText;
+            var fillColor = Colors.LightBackground;
 
-            // Draw text
-            string text = Text;
-            if (SelectedItem != null)
+            if ((e.State & DrawItemState.Selected) == DrawItemState.Selected ||
+                (e.State & DrawItemState.Focus) == DrawItemState.Focus ||
+                (e.State & DrawItemState.NoFocusRect) != DrawItemState.NoFocusRect)
+                fillColor = Colors.BlueSelection;
+
+            using (var b = new SolidBrush(fillColor))
             {
-                var formatE = new ListControlConvertEventArgs(null, typeof(string), SelectedItem);
-                OnFormat(formatE);
-                text = formatE.Value?.ToString() ?? SelectedItem.ToString();
+                g.FillRectangle(b, rect);
             }
-            using (var backBrush = new SolidBrush(BackColor))
-                e.Graphics.FillRectangle(Focused && DrawFocusRectangle ? _focusBrush : backBrush, textRect);
-            using (var foreBrush = new SolidBrush(Enabled ? ForeColor : Colors.DisabledText))
-                e.Graphics.DrawString(text ?? Text, Font, foreBrush, textRect, StringFormat.GenericDefault);
-        }
 
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            e.Graphics.Clear(BackColor);
-        }
-        #endregion Drawing
+            if (e.Index >= 0 && e.Index < Items.Count)
+            {
+                var text = Items[e.Index].ToString();
 
-        #endregion On Events
-    }
+                using (var b = new SolidBrush(textColor))
+                {
+                    var padding = 2;
 
-    #region ControlHost
+                    var modRect = new Rectangle(rect.Left + padding,
+                        rect.Top + padding,
+                        rect.Width - (padding * 2),
+                        rect.Height - (padding * 2));
 
-    [ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.ToolStrip | ToolStripItemDesignerAvailability.StatusStrip)]
-    public class ToolStripDarkComboBox : ToolStripControlHost
-    {
-        // Call the base constructor passing in a DarkComboBox instance.
-        public ToolStripDarkComboBox() : this(new DarkComboBox()) { }
-        public ToolStripDarkComboBox(Control c) : base(c) { }
+                    var stringFormat = new StringFormat
+                    {
+                        LineAlignment = StringAlignment.Center,
+                        Alignment = StringAlignment.Near,
+                        FormatFlags = StringFormatFlags.NoWrap,
+                        Trimming = StringTrimming.EllipsisCharacter
+                    };
 
-        public DarkComboBox ComboBox
-        {
-            get { return Control as DarkComboBox; }
-        }
-
-        // Expose the DarkComboBox.SelectedIndex as a property.
-        public int SelectedIndex
-        {
-            get { return ComboBox.SelectedIndex; }
-            set { ComboBox.SelectedIndex = value; }
-        }
-
-        // Subscribe and unsubscribe the control events
-        protected override void OnSubscribeControlEvents(Control c)
-        {
-            // Call the base so the base events are connected.
-            base.OnSubscribeControlEvents(c);
-
-            // Cast the control to a DarkComboBox control.
-            DarkComboBox combo = (DarkComboBox)c;
-
-            // Add the event.
-            combo.SelectedIndexChanged += new EventHandler(OnSelectedIndexChanged);
-        }
-
-        protected override void OnUnsubscribeControlEvents(Control c)
-        {
-            // Call the base method so the basic events are unsubscribed.
-            base.OnUnsubscribeControlEvents(c);
-
-            // Cast the control to a DarkComboBox control.
-            DarkComboBox combo = (DarkComboBox)c;
-
-            // Remove the event.
-            combo.SelectedIndexChanged -= new EventHandler(OnSelectedIndexChanged);
-        }
-
-        // Declare the SelectedIndexChanged event.
-        public event EventHandler SelectedIndexChanged;
-
-        // Raise the SelectedIndexChanged event.
-        private void OnSelectedIndexChanged(object sender, EventArgs e)
-        {
-            SelectedIndexChanged?.Invoke(this, e);
+                    g.DrawString(text, Font, b, modRect, stringFormat);
+                }
+            }
         }
     }
-
-    #endregion
 }

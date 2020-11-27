@@ -1,77 +1,80 @@
-﻿using System.ComponentModel;
+﻿using DarkUI.Config;
+using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using DarkUI.Config;
 
 namespace DarkUI.Controls
 {
     public class DarkGroupBox : GroupBox
     {
-        private Color _borderColor = Colors.LightBorder;
-
-        public DarkGroupBox()
-        {
-            SetStyle(ControlStyles.OptimizedDoubleBuffer |
-                    ControlStyles.ResizeRedraw |
-                    ControlStyles.UserPaint, true);
-            Paint += DarkGroupBox_Paint;
-            ForeColor = Colors.LightText;
-            BackColor = Colors.GreyBackground;
-            ResizeRedraw = true;
-            DoubleBuffered = true;
-        }
-
-        private void DarkGroupBox_Paint(object sender, PaintEventArgs e)
-        {
-            if (Parent != null)
-                e.Graphics.Clear(Parent.BackColor);
-            Size tSize = TextRenderer.MeasureText(Text, Font);
-            Rectangle borderRect = ClientRectangle;
-            borderRect.Y = borderRect.Y + tSize.Height / 2 + 1;
-            borderRect.Height = borderRect.Height - tSize.Height / 2 - 1;
-            e.Graphics.FillRectangle(new SolidBrush(BackColor), borderRect);
-            ControlPaint.DrawBorder(e.Graphics, borderRect, _borderColor, ButtonBorderStyle.Solid);
-            Rectangle textRect = ClientRectangle;
-            textRect.X = textRect.X + 6;
-            textRect.Y += borderRect.Top;
-            textRect.Width = tSize.Width + 2;
-            textRect.Height = tSize.Height - borderRect.Top;
-            e.Graphics.FillRectangle(new SolidBrush(BackColor), textRect);
-            textRect = ClientRectangle;
-            textRect.X = textRect.X + 8;
-            textRect.Width = tSize.Width + 6;
-            textRect.Height = tSize.Height + 1;
-            e.Graphics.DrawString(Text, Font, new SolidBrush(ForeColor), textRect);
-
-        }
+        private Color _borderColor = Colors.DarkBorder;
 
         [Category("Appearance")]
-        [ReadOnly(true)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Description("Determines the color of the border.")]
         public Color BorderColor
         {
             get { return _borderColor; }
             set
             {
                 _borderColor = value;
-                Invalidate(); // causes control to be redrawn
+                Invalidate();
             }
         }
 
-        [ReadOnly(true)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public new Color BackColor
+        public DarkGroupBox()
         {
-            get { return base.BackColor; }
-            set { base.BackColor = value; }
+            SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                    ControlStyles.ResizeRedraw |
+                    ControlStyles.UserPaint, true);
+
+            ResizeRedraw = true;
+            DoubleBuffered = true;
         }
 
-        [ReadOnly(true)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public new Color ForeColor
+        protected override void OnPaint(PaintEventArgs e)
         {
-            get { return base.ForeColor; }
-            set { base.ForeColor = value; }
+            var g = e.Graphics;
+            var rect = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height);
+            var stringSize = g.MeasureString(Text, Font);
+
+            var textColor = Colors.LightText;
+            var fillColor = Colors.GreyBackground;
+
+            using (var b = new SolidBrush(fillColor))
+            {
+                g.FillRectangle(b, rect);
+            }
+
+            using (var p = new Pen(BorderColor, 1))
+            {
+                var borderRect = new Rectangle(0, (int)stringSize.Height / 2, rect.Width - 1, rect.Height - ((int)stringSize.Height / 2) - 1);
+                g.DrawRectangle(p, borderRect);
+            }
+
+            var textRect = new Rectangle(rect.Left + Consts.Padding,
+                    rect.Top,
+                    rect.Width - (Consts.Padding * 2),
+                    (int)stringSize.Height);
+
+            using (var b2 = new SolidBrush(fillColor))
+            {
+                var modRect = new Rectangle(textRect.Left, textRect.Top, Math.Min(textRect.Width, (int)stringSize.Width), textRect.Height);
+                g.FillRectangle(b2, modRect);
+            }
+
+            using (var b = new SolidBrush(textColor))
+            {
+                var stringFormat = new StringFormat
+                {
+                    LineAlignment = StringAlignment.Center,
+                    Alignment = StringAlignment.Near,
+                    FormatFlags = StringFormatFlags.NoWrap,
+                    Trimming = StringTrimming.EllipsisCharacter
+                };
+
+                g.DrawString(Text, Font, b, textRect, stringFormat);
+            }
         }
     }
 }

@@ -74,6 +74,15 @@ namespace DarkUI.Collections
             ItemsRemoved?.Invoke(this, new ObservableListModified<T>(new List<T> { item }));
         }
 
+        public new void Clear()
+        {
+            ObservableListModified<T> removed = new ObservableListModified<T>(this.ToList<T>());
+            base.Clear();
+            
+            if (removed.Items.Count() > 0 && ItemsRemoved != null)
+                ItemsRemoved(this, removed);
+        }
+
         #endregion
     }
 }
