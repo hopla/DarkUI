@@ -7,6 +7,12 @@ namespace DarkUI.Controls
     {
         public bool Spring { get; set; }
 
+        public ToolStripSpringControlHost() 
+            : base(new Control())
+        {
+            
+        }
+
         public ToolStripSpringControlHost(Control c)
             : base(c)
         {
