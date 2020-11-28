@@ -16,6 +16,7 @@ namespace DarkUI.Docking
         public event EventHandler<DockContentEventArgs> ActiveContentChanged;
         public event EventHandler<DockContentEventArgs> ContentAdded;
         public event EventHandler<DockContentEventArgs> ContentRemoved;
+        public event EventHandler<DockContentRemovingEventArgs> ContentRemoving;
 
         #endregion
 
@@ -197,6 +198,11 @@ namespace DarkUI.Docking
         {
             if (!_contents.Contains(dockContent))
                 return;
+
+            // check if no cancelled
+            Boolean cancel = new Boolean(false);
+            ContentRemoving?.Invoke(this, new DockContentRemovingEventArgs(dockContent, cancel));
+            if (cancel.Value) return;
 
             dockContent.DockPanel = null;
             _contents.Remove(dockContent);
