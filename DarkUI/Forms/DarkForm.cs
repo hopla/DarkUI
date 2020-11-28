@@ -38,7 +38,7 @@ namespace DarkUI.Forms
             BackColor = Colors.GreyBackground;
         }
 
-        public sealed override Color BackColor
+        public override Color BackColor
         {
             get { return base.BackColor; }
             set { base.BackColor = value; }
