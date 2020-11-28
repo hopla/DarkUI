@@ -148,6 +148,22 @@ namespace DarkUI.Controls
 
         public int VisibleIndex { get; set; }
 
+        public bool IsVisible
+        {
+            get
+            {
+                var parent = ParentNode;
+
+                while (parent != null)
+                {
+                    if (!parent.Expanded) return false;
+                    parent = parent.ParentNode;
+                }
+
+                return true;
+            }
+        }
+
         public bool IsNodeAncestor(DarkTreeNode node)
         {
             var parent = ParentNode;

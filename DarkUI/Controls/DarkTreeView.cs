@@ -377,6 +377,9 @@ namespace DarkUI.Controls
                 return;
             }
 
+            if (!SelectWithArrowKeys)
+                return;
+
             switch (e.KeyCode)
             {
                 case Keys.Down:

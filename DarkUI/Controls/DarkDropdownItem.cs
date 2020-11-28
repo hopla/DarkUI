@@ -10,6 +10,8 @@ namespace DarkUI.Controls
 
         public Bitmap Icon { get; set; }
 
+        public object Tag { get; set; }
+
         #endregion
 
         #region Constructor Region

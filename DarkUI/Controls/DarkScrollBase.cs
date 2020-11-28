@@ -102,6 +102,11 @@ namespace DarkUI.Controls
             }
         }
 
+        [Category("Behavior")]
+        [Description("Determines whether the selected node can be changed with the arrow keys.")]
+        [DefaultValue(true)]
+        public bool SelectWithArrowKeys { get; set; }
+
         #endregion
 
         #region Constructor Region
