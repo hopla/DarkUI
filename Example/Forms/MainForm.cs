@@ -165,6 +165,12 @@ namespace Example.Forms
             test.ShowDialog();
         }
 
+        private void darkChildFormToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = new DarkChildForm();
+            form.Show();
+        }
+
         private void Project_Click(object sender, EventArgs e)
         {
             ToggleToolWindow(_dockProject);
